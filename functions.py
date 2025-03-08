@@ -1,4 +1,9 @@
 import requests
+from urllib3.exceptions import InsecureRequestWarning
+
+# Tắt cảnh báo SSL không an toàn (nếu cần)
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
 
 def find_admin_page(base_url):
     """
@@ -30,11 +35,12 @@ def find_admin_page(base_url):
     for path in admin_paths:
         url = base_url + path
         try:
-            response = requests.get(url, timeout=5)
+            # Gửi yêu cầu GET với SSL verify=False (nếu cần)
+            response = requests.get(url, timeout=5, verify=False)
             if response.status_code == 200:  # Trang tồn tại
                 print(f"Tìm thấy trang admin tại: {url}")
                 return url
-        except requests.RequestException as e:
+        except requests.exceptions.RequestException as e:
             print(f"Lỗi khi truy cập {url}: {e}")
 
     print("Không tìm thấy trang admin.")
@@ -43,7 +49,10 @@ def find_admin_page(base_url):
 
 # Ví dụ sử dụng
 if __name__ == "__main__":
-    base_url = "http://bun.sub"  # Thay bằng địa chỉ website bạn muốn kiểm tra
+    base_url = input("Nhập địa chỉ website (ví dụ: http://bun.sub): ").strip()
+    if not base_url.startswith(("http://", "https://")):
+        base_url = "http://" + base_url  # Mặc định sử dụng HTTP nếu không có scheme
+
     admin_page = find_admin_page(base_url)
     if admin_page:
         print(f"Trang admin được tìm thấy: {admin_page}")
