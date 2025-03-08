@@ -1,8 +1,14 @@
 import requests
 from urllib3.exceptions import InsecureRequestWarning
+import sys
+import io
 
 # Tắt cảnh báo SSL không an toàn (nếu cần)
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+# Đặt encoding mặc định cho stdin và stdout
+sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 
 def find_admin_page(base_url):
@@ -49,12 +55,17 @@ def find_admin_page(base_url):
 
 # Ví dụ sử dụng
 if __name__ == "__main__":
-    base_url = input("Nhập địa chỉ website (ví dụ: http://bun.sub): ").strip()
-    if not base_url.startswith(("http://", "https://")):
-        base_url = "http://" + base_url  # Mặc định sử dụng HTTP nếu không có scheme
+    try:
+        # Nhập địa chỉ website từ người dùng
+        base_url = input("Nhập địa chỉ website (ví dụ: http://bun.sub): ").strip()
+        if not base_url.startswith(("http://", "https://")):
+            base_url = "http://" + base_url  # Mặc định sử dụng HTTP nếu không có scheme
 
-    admin_page = find_admin_page(base_url)
-    if admin_page:
-        print(f"Trang admin được tìm thấy: {admin_page}")
-    else:
-        print("Không tìm thấy trang admin.")
+        # Tìm trang admin
+        admin_page = find_admin_page(base_url)
+        if admin_page:
+            print(f"Trang admin được tìm thấy: {admin_page}")
+        else:
+            print("Không tìm thấy trang admin.")
+    except Exception as e:
+        print(f"Lỗi: {e}")
